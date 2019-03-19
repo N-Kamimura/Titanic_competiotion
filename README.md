@@ -6,7 +6,6 @@ Kaggleの"Titanic: Machine Learning from Disaster"で上位5％に入った時�
 
 
 【特徴量の選択の方針】
-
 　1.基本方針
 <br>　　客室の等級、性別、子供であるかが最も重要なものであると判断しています。
 
