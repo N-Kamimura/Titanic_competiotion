@@ -1,0 +1,22 @@
+# the features
+features={
+  "Fare",
+  "Null",
+  "Parch_1_without_Parch",
+  "Sex_male",
+  "Pclass_2",
+  "Pclass_3",
+  "Child",
+  "Old",
+  "Family_size_1_Large",
+  "Family_size_1_Small",	
+  "Family_size_1_Couple"}
+
+
+# the parametoir of XGboost
+params={"max_depth":[6],
+        "min_child_weight":[0.7],
+        "gamma":[0.6],
+        "subsample":[0.8],
+        "n_estimators":[150],
+        "colsample_bytree":[0.7]}
