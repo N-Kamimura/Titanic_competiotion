@@ -1,0 +1,80 @@
+import pandas as pd
+
+# Loading train data
+df_train = pd.read_csv("train.csv")
+
+
+# Count null by samples
+df_null = df_train.isnull().sum(axis=1)
+df_add = pd.concat([df_train, df_null], axis=1)
+df_add = df_add.rename(columns={0: "Null"})
+
+# Extract　”Title”
+df_split1 = df_train["Name"].str.split(", ", expand=True).drop(0, axis=1)
+df_split2 = df_split1[1].str.split(".", expand=True).drop([1,2], axis=1)
+df_split2 = df_split2.rename(columns={0: "Title"})
+
+df_add = pd.concat([df_add, df_split2], axis=1)
+
+# distinguish whether or not embarked with children or parents
+for i in df_add:
+    df_add.loc[df_add['Parch'] == 0, 'Parch_1'] = "with_Parch"
+    df_add.loc[df_add['Parch'] > 0, 'Parch_1'] = "without_Parch"
+    
+# distinguish whether or not embarked with spouse or brothers
+for i in df_add:
+    df_add.loc[df_add['SibSp'] == 0, 'SibSp_1'] = "with_SibSp"
+    df_add.loc[df_add['SibSp'] > 0, 'SibSp_1'] = "without_SibSp"
+    
+# Fill in the blanks of "Age" with average ages of every titles(if title is miss, consider her Parch1)
+master_ave=df_add["Age"][(df_add["Title"]=="Master")].mean()
+miss_ch_ave=df_add["Age"][(df_add["Title"]=="Miss") & (df_add["Parch_1"]=="with_Parch")].mean()
+miss_ad_ave=df_add["Age"][(df_add["Title"]=="Miss") & (df_add["Parch_1"]=="without_Parch")].mean()
+mr_ave=df_add["Age"][(df_add["Title"]=="Mr")].mean()
+mrs_ave=df_add["Age"][(df_add["Title"]=="Mrs")].mean()
+
+for i in df_add:
+    df_add.loc[(df_add['Title'] == "Master") & (df_add["Age"].isnull()), 'Age'] = master_ave
+    df_add.loc[(df_add["Title"]=="Miss") & (df_add["Parch_1"]=="with_Parch") & (df_add["Age"].isnull()), 'Age'] = miss_ch_ave
+    df_add.loc[(df_add["Title"]=="Miss") & (df_add["Parch_1"]=="without_Parch") & (df_add["Age"].isnull()), 'Age'] = miss_ad_ave
+    df_add.loc[(df_add["Sex"]=="male") & (df_add["Age"].isnull()), 'Age'] = mr_ave
+    df_add.loc[(df_add["Sex"]=="female") & (df_add["Age"].isnull()), 'Age'] = mrs_ave
+    
+df_add = pd.get_dummies(df_add, drop_first=True, columns=["Parch_1"])
+df_add = pd.get_dummies(df_add, drop_first=True, columns=["SibSp_1"])
+
+#  making "Sex" dummy
+df_add = pd.get_dummies(df_add, drop_first=True, columns=["Sex"])
+
+#  making "Pclass" dummy
+df_add = pd.get_dummies(df_add, drop_first=True, columns=["Pclass"])
+
+#　making "Child" dummy
+import numpy as np
+child = (df_add['Age'] <= 14).astype(np.int64)
+child.name = 'Child'
+df_add_ch=pd.concat([df_add, child], axis=1)
+
+#　making "Old" dummy
+import numpy as np
+old = (df_add['Age'] >= 50).astype(np.int64)
+old.name = 'Old'
+df_add_old=pd.concat([df_add_ch, old], axis=1)
+
+#　making "Familysize" dummy
+family_size = df_add_old["SibSp"]+df_add_old["Parch"]
+family_size.name="Family_size"
+df_add_old=pd.concat([df_add_old, family_size], axis=1)
+df_add_old.head()
+
+for i in df_add_old:
+    df_add_old.loc[df_add_old['Family_size'] < 4, 'Family_size_1'] = "Small"
+    df_add_old.loc[df_add_old['Family_size'] >= 4, 'Family_size_1'] = "Large"
+    df_add_old.loc[df_add_old['Family_size'] == 1, 'Family_size_1'] = "couple"
+    df_add_old.loc[df_add_old['Family_size'] == 0, 'Family_size_1'] = "Alone"
+df_add_old = pd.get_dummies(df_add_old, drop_first=True, columns=["Family_size_1"])
+
+# selecting X and y
+drop_col = ["Embarked,"PassengerId", "Parch", "Ticket", "Cabin", "Name", "Title", "SibSp", "Age","Family_size","SibSp_1_without_SibSp"]
+df_add2 = df_add_old.drop(drop_col, axis=1)
+df_add2.head()
