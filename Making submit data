@@ -1,0 +1,9 @@
+X_test = df2_add2
+y_test_pred_xg = xg.predict(X_test)
+
+df_y =  pd.DataFrame({'Survived':y_test_pred_xg})
+submit = pd.concat([df_test, df_y], axis=1)
+
+drop_col = ["Pclass", "Name", "Sex", "Age", "Parch", "Ticket", "Cabin", "Fare", "Embarked", "SibSp"]
+df_submit = submit.drop(drop_col, axis=1)
+df_submit.to_csv("submit0220_7_custom.csv")
