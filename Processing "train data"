@@ -39,7 +39,8 @@ for i in df_add:
     df_add.loc[(df_add["Title"]=="Miss") & (df_add["Parch_1"]=="without_Parch") & (df_add["Age"].isnull()), 'Age'] = miss_ad_ave
     df_add.loc[(df_add["Sex"]=="male") & (df_add["Age"].isnull()), 'Age'] = mr_ave
     df_add.loc[(df_add["Sex"]=="female") & (df_add["Age"].isnull()), 'Age'] = mrs_ave
-    
+
+# Making with_Parch/without_Parch and with_SibSp/without_SibSp
 df_add = pd.get_dummies(df_add, drop_first=True, columns=["Parch_1"])
 df_add = pd.get_dummies(df_add, drop_first=True, columns=["SibSp_1"])
 
