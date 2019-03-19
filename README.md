@@ -1,5 +1,4 @@
-# Titanic
-How to make the data for titanic competition
+# Titanic: Machine Learning from Disaster
 
 Kaggleの"Titanic: Machine Learning from Disaster"で上位5％に入った時のコードです。
 
